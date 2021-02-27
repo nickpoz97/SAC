@@ -42,6 +42,7 @@ class SAC:
         
         self.env = env
 
+        # actor NN takes state as input and returns what it seems to be best action
         self.actor = DeepNetwork.build(env, params['actor'], actor=True, name='actor')
         self.actor_opt = Adam()
 
@@ -69,17 +70,20 @@ class SAC:
 
         """
 
+        # actor NN takes the state as argument and returns an action vector
         mu = self.actor(np.array([state])).numpy()[0]
+        # action is chosen with some stochasticity
         action = np.random.normal(loc=mu, scale=std)
         return action
     
-    def update(self, gamma, batch_size, std):
+    def update(self, gamma, batch_size, std, alpha):
         """Prepare the samples to update the network
 
         Args:
             gamma (float): discount factor
             batch_size (int): batch size for the off-policy A2C
             std (float): Gaussian distribution std for action selection
+            alpha (float): trade-off coefficient
 
         Returns:
             None
@@ -93,9 +97,10 @@ class SAC:
         dones = dones.reshape(-1, 1)
 
         self.update_continuous(gamma, std, \
-            states, actions, rewards, obs_states, dones)
+            states, actions, rewards, obs_states, dones, alpha)
 
-    def update_continuous(self, gamma, std, states, actions, rewards, obs_states, dones):
+    def update_continuous(self, gamma, std, states, actions, rewards, obs_states, dones,
+                          alpha=0.2):
         """Improved version of TD3. It learns two Q-functions, and uses the smaller Q to form the targets. It uses an entropy term in the update of both the critic and the actor. 
         It uses the current policy to sample the actions. 
         The actor tries to max the state-action values given by the critic, sampling the action 
@@ -110,13 +115,14 @@ class SAC:
             rewards (list): episode's rewards for the update
             obs_states (list): episode's obs_states for the update
             dones (list): episode's dones for the update
+            alpha (float): trade-off coefficient
 
         Returns:
             None
         """
 
         with tf.GradientTape() as tape_c1, tf.GradientTape() as tape_c2, tf.GradientTape() as tape_a:
-            # Compute π(s'|θ) for the critic target
+            # Compute π(s'|θ) for the critic target (list of actions)
             mu = self.actor(obs_states)
             tg_actions = np.random.normal(loc=mu, scale=std)
 
@@ -134,7 +140,7 @@ class SAC:
             # It works also without this, but it optimize the learning process
             gauss_p = tf.math.reduce_mean(gauss_p, axis=1, keepdims=True) 
             log_p = tf.math.log(gauss_p)
-            log_p *= 0.2    # α = 0.2
+            log_p *= alpha    # α
 
             # Compute the critic target
             critic_targets = rewards + gamma * min_tg_values * dones
@@ -172,15 +178,15 @@ class SAC:
             # It works also without this, but it optimize the learning process
             gauss_p = tf.math.reduce_mean(gauss_p, axis=1, keepdims=True) 
             log_p = tf.math.log(gauss_p)
-            log_p *= 0.2    # α = 0.2    
+            log_p *= alpha    # α
 
             # Compute min Q(s,a_squash(s|θ))
             states_values1 = self.critic1([states, action_squashed]).numpy()
             states_values2 = self.critic2([states, action_squashed]).numpy()
-            min_tg_values = tf.math.minimum(tg1_values, tg2_values)
+            min_values = tf.math.minimum(states_values1, states_values2)
 
             # Compute actor objective max (minQ(s,a_squash(s|θ)) - α log π(a_squash(s|θ)|θ))
-            actor_objective = tf.math.subtract(min_tg_values, log_p)
+            actor_objective = tf.math.subtract(min_values, log_p)
             actor_objective = -tf.math.reduce_mean(actor_objective)
 
             # Compute the actor gradient and update the network
@@ -222,6 +228,7 @@ class SAC:
         tau = hyperp['tau']
         std, std_scale = hyperp['std'], hyperp['std_scale']
         std_decay, std_min = params['std_decay'], params['std_min']
+        alpha, alpha_decay, constant_alpha = params['alpha'], params['alpha_decay'], params['constant_alpha']
 
         steps = 0
         
@@ -245,13 +252,14 @@ class SAC:
                 steps += 1
 
                 state = obs_state
-            
                 if steps >= 100:
                     self.update(                        
                         params['gamma'], 
                         params['buffer']['batch'],
-                        std
+                        std,
+                        alpha = alpha
                     )
+
                     self.polyak_update(self.critic1.variables, self.critic1_tg.variables, tau)
                     self.polyak_update(self.critic2.variables, self.critic2_tg.variables, tau)      
 
@@ -266,4 +274,8 @@ class SAC:
             if e % verbose == 0: tracker.save_metrics()
 
             print(f'Ep: {e}, Ep_Rew: {ep_reward}, Mean_Rew: {np.mean(mean_reward)}')
-        
+            print('Alpha: ' + str(alpha))
+
+            # update alpha only if indicated
+            if constant_alpha == False:
+                alpha = max(alpha * alpha_decay, 0.00001)
