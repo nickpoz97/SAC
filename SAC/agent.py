@@ -39,12 +39,12 @@ class SAC:
         Returns:
             None
         """
-        
+        # TODO: modify learning rate of Adam optimizer
         self.env = env
 
         # actor NN takes state as input and returns what it seems to be best action
         self.actor = DeepNetwork.build(env, params['actor'], actor=True, name='actor')
-        self.actor_opt = Adam()
+        self.actor_opt = Adam(learning_rate=0.0001)
 
         self.critic1 = DeepNetwork.build(env, params['critic'], name='critic1')
         self.critic2 = DeepNetwork.build(env, params['critic'], name='critic2')
@@ -52,8 +52,8 @@ class SAC:
         self.critic2_tg = DeepNetwork.build(env, params['critic'], name='critic2_tg')
         self.critic1_tg.set_weights(self.critic1.get_weights())
         self.critic2_tg.set_weights(self.critic2.get_weights())
-        self.critic1_opt = Adam()
-        self.critic2_opt = Adam()
+        self.critic1_opt = Adam(learning_rate=0.0001)
+        self.critic2_opt = Adam(learning_rate=0.0001)
         
         self.buffer = Buffer(params['buffer']['size'])
 
@@ -129,6 +129,7 @@ class SAC:
             # Compute the Q_targ(s',π(s'|θ))
             tg1_values = self.critic1_tg([obs_states, tg_actions]).numpy()
             tg2_values = self.critic2_tg([obs_states, tg_actions]).numpy()
+            # element wise minimun Q
             min_tg_values = tf.math.minimum(tg1_values, tg2_values)
 
             # Compute α log π(π(s'|θ)|s')
@@ -138,8 +139,8 @@ class SAC:
             gauss_p = tf.math.divide(gauss_n, gauss_d)
             # We combine the contribution of the actions in case of |actions| > 1
             # It works also without this, but it optimize the learning process
-            gauss_p = tf.math.reduce_mean(gauss_p, axis=1, keepdims=True) 
-            log_p = tf.math.log(gauss_p)
+            gauss_p = tf.math.reduce_mean(gauss_p, axis=1, keepdims=True)
+            log_p = tf.math.log(gauss_p + 1e-6)
             log_p *= alpha    # α
 
             # Compute the critic target
