@@ -44,7 +44,7 @@ class SAC:
 
         # actor NN takes state as input and returns what it seems to be best action
         self.actor = DeepNetwork.build(env, params['actor'], actor=True, name='actor')
-        self.actor_opt = Adam(learning_rate=0.0001)
+        self.actor_opt = Adam()
 
         self.critic1 = DeepNetwork.build(env, params['critic'], name='critic1')
         self.critic2 = DeepNetwork.build(env, params['critic'], name='critic2')
@@ -52,8 +52,8 @@ class SAC:
         self.critic2_tg = DeepNetwork.build(env, params['critic'], name='critic2_tg')
         self.critic1_tg.set_weights(self.critic1.get_weights())
         self.critic2_tg.set_weights(self.critic2.get_weights())
-        self.critic1_opt = Adam(learning_rate=0.0001)
-        self.critic2_opt = Adam(learning_rate=0.0001)
+        self.critic1_opt = Adam()
+        self.critic2_opt = Adam()
         
         self.buffer = Buffer(params['buffer']['size'])
 
@@ -140,7 +140,7 @@ class SAC:
             # We combine the contribution of the actions in case of |actions| > 1
             # It works also without this, but it optimize the learning process
             gauss_p = tf.math.reduce_mean(gauss_p, axis=1, keepdims=True)
-            log_p = tf.math.log(gauss_p + 1e-6)
+            log_p = tf.math.log(gauss_p)
             log_p *= alpha    # α
 
             # Compute the critic target
@@ -168,11 +168,13 @@ class SAC:
 
             # Compute a_squash(s|θ) = tanh(μ(s|θ) + δ(s) * N(0, I))   
             mu = self.actor(obs_states)
-            action_squashed = mu + tf.random.normal(shape=mu.shape)
-            action_squashed = tf.math.tanh(action_squashed)
+            #action_squashed = mu + tf.random.normal(shape=mu.shape)
+            #action_squashed = tf.math.tanh(action_squashed)
+            new_actions = np.random.normal(loc=mu, scale=std)
 
             # Compute α log π(a_squash(s|θ)|θ)
-            gauss_n = tf.math.exp(-0.5 * ((action_squashed - mu) / std)**2)
+            #gauss_n = tf.math.exp(-0.5 * ((action_squashed - mu) / std)**2)
+            gauss_n = tf.math.exp(-0.5 * ((new_actions - mu) / std) ** 2)
             gauss_n = tf.cast(gauss_n, dtype=np.float32)
             gauss_p = tf.math.divide(gauss_n, gauss_d)
             # We combine the contribution of the actions in case of |actions| > 1
@@ -182,8 +184,10 @@ class SAC:
             log_p *= alpha    # α
 
             # Compute min Q(s,a_squash(s|θ))
-            states_values1 = self.critic1([states, action_squashed]).numpy()
-            states_values2 = self.critic2([states, action_squashed]).numpy()
+            '''states_values1 = self.critic1([states, action_squashed]).numpy()
+            states_values2 = self.critic2([states, action_squashed]).numpy()'''
+            states_values1 = self.critic1([states, new_actions]).numpy()
+            states_values2 = self.critic2([states, new_actions]).numpy()
             min_values = tf.math.minimum(states_values1, states_values2)
 
             # Compute actor objective max (minQ(s,a_squash(s|θ)) - α log π(a_squash(s|θ)|θ))
@@ -264,10 +268,7 @@ class SAC:
                     self.polyak_update(self.critic1.variables, self.critic1_tg.variables, tau)
                     self.polyak_update(self.critic2.variables, self.critic2_tg.variables, tau)      
 
-                if done: break  
-
-            if std_scale: 
-                std = max(std_min, std * std_decay)
+                if done: break
 
             mean_reward.append(ep_reward)
             tracker.update([e, ep_reward])
@@ -276,7 +277,10 @@ class SAC:
 
             print(f'Ep: {e}, Ep_Rew: {ep_reward}, Mean_Rew: {np.mean(mean_reward)}')
             print('Alpha: ' + str(alpha))
+            print("Std: " + str(std))
 
             # update alpha only if indicated
             if constant_alpha == False:
-                alpha = max(alpha * alpha_decay, 0.00001)
+                alpha = max(alpha * alpha_decay, 0.0)
+            if std_scale:
+                std = max(std_min, std * std_decay)
