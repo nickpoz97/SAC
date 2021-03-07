@@ -1,5 +1,5 @@
 setup:
-  seed: 5
+  seed: 8
   use_gpu: False
 
 train:
@@ -13,12 +13,12 @@ agent:
 
   alpha: 1
   alpha_scale: True
-  alpha_decay: .997
+  alpha_decay: .999
   alpha_min: .0001
 
   std_scale: True
-  std_decay: .997 # original: .99
-  std_min: 0.0
+  std_decay: .999 # original: .99
+  std_min: 0.01
   std: 1 # original: 1
   
   buffer:

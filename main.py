@@ -12,7 +12,7 @@ import yaml
 from agent import SAC
 from utils.tracker import Tracker
 
-with open('stored/test17/config.yml', 'r') as ymlfile:
+with open('config.yml', 'r') as ymlfile:
     cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
     seed = cfg['setup']['seed']
     ymlfile.close()

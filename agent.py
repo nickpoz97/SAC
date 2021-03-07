@@ -9,7 +9,7 @@ from collections import deque
 import yaml
 import numpy as np
 
-with open('stored/test17/config.yml', 'r') as ymlfile:
+with open('config.yml', 'r') as ymlfile:
     cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
     seed = cfg['setup']['seed']
     ymlfile.close()
