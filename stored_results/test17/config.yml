@@ -8,18 +8,6 @@ train:
   verbose: 50
 
 agent:
-<<<<<<< HEAD
-  gamma: 0.99 #0.99
-  tau: 0.0005 #0.005
-
-  alpha: .5
-  alpha_scale: True
-  alpha_decay: .996
-  alpha_min: .0001
-
-  std_scale: True
-  std_decay: .996 # original: .99
-=======
   gamma: 0.99999 #0.99
   tau: 0.005 #0.005
 
@@ -30,13 +18,12 @@ agent:
 
   std_scale: True
   std_decay: .997 # original: .99
->>>>>>> 50c50abf8e1318d1af5420d8399640f8a5c76510
   std_min: 0.01
   std: 1 # original: 1
   
   buffer:
     size: 10000
-    batch: 1024 # origi: 128
+    batch: 256 # origi: 128
 
   actor:
     h_layers: 2
