@@ -1,0 +1,2 @@
+- una tau di 0.01 probabilmente è troppo alta e causa instabilità (0.005 * 2)
+- batch di 1024 troppo grande

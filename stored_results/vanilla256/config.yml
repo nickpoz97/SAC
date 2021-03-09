@@ -9,25 +9,25 @@ train:
 
 agent:
   gamma: 0.99 #0.99
-  tau: 1 #0.005
+  tau: 0.005 #0.005
 
-  alpha: 1
-  alpha_scale: True
-  alpha_decay: .999
-  alpha_min: 0.1
+  alpha: .2
+  alpha_scale: False
+  alpha_decay: .995
+  alpha_min: 0.0
 
   std_scale: True
   std_decay: .996 # original: .99
   std_min: 0.01
-  std: 0.5 # original: 1
+  std: 1 # original: 1
   
   buffer:
     size: 10000
-    batch: 4096 # origi: 128
+    batch: 128 # origi: 128
 
   actor:
-    h_layers: 4
-    h_size: 64
+    h_layers: 2
+    h_size: 256
     print_model: False
 
   critic:
@@ -35,8 +35,8 @@ agent:
     h_state_size: 8
     h_action_layers: 0
     h_action_size: 2
-    h_layers: 4
-    h_size: 64
+    h_layers: 2
+    h_size: 256
     print_model: False
   
       
