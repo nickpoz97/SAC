@@ -269,6 +269,7 @@ class SAC:
 
             print(f'Ep: {e}, Ep_Rew: {ep_reward}, Mean_Rew: {np.mean(mean_reward)}')
             print('alpha: {}    std: {}'.format(alpha, std))
+            print('tau: ' + str(tau))
 
             if std_scale:
                 std = max(std_min, std * std_decay)
