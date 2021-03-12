@@ -1,0 +1,2 @@
+comparison with test5:
+alpha = .8

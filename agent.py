@@ -226,6 +226,8 @@ class SAC:
         std_decay, std_min = params['std_decay'], params['std_min']
         alpha, alpha_scale = params['alpha'], params['alpha_scale']
         alpha_min, alpha_decay = params['alpha_min'], params['alpha_decay']
+        alpha_scaling_type = params['alpha_scaling_type']
+        std_scaling_type = params['std_scaling_type']
 
         steps = 0
         
@@ -267,13 +269,19 @@ class SAC:
 
             if e % verbose == 0: tracker.save_metrics()
 
+            #DeepNetwork.print_weights(self.critic1)
             print(f'Ep: {e}, Ep_Rew: {ep_reward}, Mean_Rew: {np.mean(mean_reward)}')
             print('alpha: {}    std: {}'.format(alpha, std))
-            print('tau: ' + str(tau))
+            #print('tau: ' + str(tau))
 
             if std_scale:
-                std = max(std_min, std * std_decay)
+                if std_scaling_type == 'time_scale':
+                    std = max(std_min, std * std_decay)
+                elif std_scaling_type == 'sigmoid':
+                    std = 1/(np.exp(np.mean(mean_reward) / 200) + 1)
 
             if alpha_scale:
-                alpha = max(alpha_min, alpha * alpha_decay)
-        
+                if alpha_scaling_type == 'time_scale':
+                    alpha = max(alpha_min, alpha * alpha_decay)
+                elif alpha_scaling_type == 'sigmoid':
+                    alpha = 1/(np.exp(np.mean(mean_reward) / 200) + 1)

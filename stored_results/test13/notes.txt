@@ -1,0 +1,1 @@
+used sigmoid only for std (reference test5)
