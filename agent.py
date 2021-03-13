@@ -275,13 +275,18 @@ class SAC:
             #print('tau: ' + str(tau))
 
             if std_scale:
-                if std_scaling_type == 'time_scale':
+                if std_scaling_type == 'standard_time':
                     std = max(std_min, std * std_decay)
-                elif std_scaling_type == 'sigmoid':
+                elif std_scaling_type == 'sigmoid_reward':
                     std = 1/(np.exp(np.mean(mean_reward) / 200) + 1)
+                elif std_scaling_type == 'tanh_time':
+                    std = .5 - np.tanh(e / 100 - 3) / 2
 
             if alpha_scale:
-                if alpha_scaling_type == 'time_scale':
+                if alpha_scaling_type == 'standard_time':
                     alpha = max(alpha_min, alpha * alpha_decay)
-                elif alpha_scaling_type == 'sigmoid':
+                elif alpha_scaling_type == 'sigmoid_reward':
                     alpha = 1/(np.exp(np.mean(mean_reward) / 200) + 1)
+                elif alpha_scaling_type == 'tanh_time':
+                    alpha = .5 - np.tanh(e / 100 - 3) / 2
+

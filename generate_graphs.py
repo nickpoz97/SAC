@@ -41,7 +41,7 @@ def extract_values_from_csvs(folder, filename_list):
     return values
 
 
-def plot_single_result(test_name):
+def plot_all_seeds(test_name):
     plt.close()
     n_averaged_samples = 20
     values = tests_dict[test_name]
@@ -53,7 +53,29 @@ def plot_single_result(test_name):
     plt.title(test_name)
     plt.ylim([-600, 100])
     plt.xlim([0, 1000])
-    graph_path = graphs_dir + os.sep + 'single_test' + os.sep + test_name + '.png'
+    graph_path = graphs_dir + os.sep + 'tests_with_seeds' + os.sep + test_name + '.png'
+    plt.savefig(graph_path, dpi=150)
+    plt.cla()
+
+def plot_averaged_seeds(test_name):
+    plt.close()
+    n_averaged_samples = 20
+    values = tests_dict[test_name]
+
+    # mean between seeds
+    values = np.mean(values, axis=0)
+    x1 = range(values.size)
+    plt.plot(x1, values, '-')
+
+    averaged_episodes = np.mean(values.reshape(-1, n_averaged_samples), axis=1)
+    # 1000 episodes, n_averaged_samples = 10 -> x: 5, 15, 25, ... 995
+    x2 = range(n_averaged_samples // 2, n_episodes, n_averaged_samples)
+    plt.plot(x2, averaged_episodes, 'o-')
+
+    plt.title(test_name)
+    plt.ylim([-600, 100])
+    plt.xlim([0, 1000])
+    graph_path = graphs_dir + os.sep + 'tests_with_variance' + os.sep + test_name + '.png'
     plt.savefig(graph_path, dpi=150)
     plt.cla()
 
@@ -65,4 +87,5 @@ if __name__ == '__main__':
         # using test folder name as key
         key = dir_path.split(sep=os.sep)[-1]
         tests_dict[key] = extract_values_from_csvs(dir_path, dir_files)
-        plot_single_result(key)
+        plot_all_seeds(key)
+        plot_averaged_seeds(key)

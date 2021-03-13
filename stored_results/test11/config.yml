@@ -11,17 +11,17 @@ agent:
   gamma: 0.99 #0.99
   tau: 0.005 #0.005
 
-  alpha: 0.1
+  alpha: .4
   alpha_scale: False
-  alpha_decay: .94
-  alpha_min: 0.1
-  alpha_scaling_type: 'standard_time'
+  alpha_decay: .994
+  alpha_min: 0.01
+  alpha_scaling_type: 'sigmoid_reward'
 
-  std_scale: False
-  std_decay: .90 # original: .99
-  std_min: 0.1
-  std: 0.1 # original: 1
-  std_scaling_type: 'standard_time'
+  std_scale: True
+  std_decay: .995 # original: .99
+  std_min: 0.01
+  std: 1 # original: 1
+  std_scaling_type: 'tanh_time'
   
   buffer:
     size: 100000

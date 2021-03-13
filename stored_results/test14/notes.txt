@@ -1,1 +1,1 @@
-used time for both alpha and std
+fast decay (test5 reference)

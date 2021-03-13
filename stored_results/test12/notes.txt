@@ -1,1 +1,1 @@
-- used sigmoid only for alpha (reference test5)
+- used sigmoid_reward only for alpha (reference test5) and tanh_time for std

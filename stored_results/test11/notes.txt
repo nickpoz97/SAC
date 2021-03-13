@@ -1,1 +1,1 @@
-used sigmoid for both alpha and std (reference test 5)
+used tanh for std
