@@ -54,13 +54,23 @@ Questo permette una maggiore esplorazione, così il training può coinvolgere pi
 Lo scopo del trade-off coefficient è quello di dare la possibilità di diminuire il peso dell' entropia sul valore degli stati e dare più priorità all' exploitation.
 
 ## Tweaking dei parametri:
-Per il training ci sono diversi tipi di parametri modificabili in questa sezione specificherò quali ho deciso di modificare, quali no e il perchè
-* numero dei episodi per training: ho notato che il trend dei reward accumulati non subisce grosse variazioni dopo circa l' episodio 700 per ogni test, quindi ho preferito non andare oltre i 1001 episodi anche per evitare overfitting
-* std_scale (scaling progressivo della std della policy): in alcuni test ho provato a mantenerlo fisso così da mantenere fissa la std della policy, ma facendo così il reward medio era basso per std che si allontanavano dallo 0 (probabilmente perchè non si riuscivano ad ottenere i valori corretti degli stati), mentre diminuirla nel tempo ha sempre portato a risultati migliori.
-* std_decay: tendenzialmente ho scelto valori mediamente alti (tra 0.99 e 0.999) in modo da non diminuire troppo in fretta la std ed evitare la convergenza ad una policy deterministica
-* std_min: valore che ho lasciato invariato nella maggior parte dei casi a 0.01, valore vicino allo zero che però permette sempre una minima esplorazione (valore tendenzialmente raggiunto dopo la metà del training per la mia scelta dei valori di std_decay)
-* alpha_scale: tenere fisso (False) questo valore ad alpha non troppo alte ha portato a buoni risultati, probabilmente perchè il contributo dato dall' entropia non è troppo elevato verso la fine del training e quindi il peso dato dai reward in genere è maggiore.
-Ho preferito impostarlo a true quando alpha parte a 1
-* alpha_decay: impostato sempre su valori elevati (tra 0.99 e 0.999) per evitare un decadimento troppo veloce come per std
-* alpha_min: **?**
-* 
+Per il training ci sono diversi tipi di parametri modificabili in questa sezione li elencherò con una breve descrizione
+* numero dei episodi per training: ho notato che il trend dei reward accumulati non subisce grosse variazioni dopo circa l' episodio 500 per ogni test, quindi ho preferito non andare oltre i 1001 episodi (anche per evitare overfitting)
+* std_scale (scaling progressivo della std della policy): booleano che indica se il valore della rumore associato alla policy stocastica diminuirà (True) o rimarrà costante (False) durante il training.
+* std_scaling_type: tipo di scaling usato per il rumore durante il training (verrà discusso in modo approfondito nella trattazione dei test)
+* std_decay: valore decimale < 1 che indica un fattore da moltiplicare per il rumore dopo ogni episodio (se il tipo di scaling è standard).
+* std_min: valore minimo di rumore.
+* std: valore iniziale della std.
+* Il coefficiente di trade-off alpha presenta gli stessi parametri del rumore std (valore iniziale, scaling si/no, valore minimo, tipo di scaling, fattore di scaling)
+* buffer size: massimo numero di elementi presenti nel replay buffer
+* batch: numero di tuple (s, a, r, s', done) usate per il calcolo delle loss functions (experience replay)
+* actor: parametri della rete neurale che rappresenta la policy:
+	* numero di hidden layers (lasciato sempre a 2)
+	* nodi per ogni hideen layer
+* critic: parametri per la rete neurale che rappresenta le funzioni Q
+	* numero di hidden layers collegati solo allo stato di input (o azione di input)
+	* numero di nodi per per hidden layer collegati solo allo stato di input (o azione di input)
+	* numero di hidden layers collegati sia a stato che azioni
+	* numero di nodi per ogni hidden layer generico
+
+## Discussione dei test
