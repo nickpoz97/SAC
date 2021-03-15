@@ -1,1 +1,1 @@
-increased number of hidden neurons (test5)
+used tanh for std

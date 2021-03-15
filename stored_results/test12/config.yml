@@ -11,11 +11,11 @@ agent:
   gamma: 0.99 #0.99
   tau: 0.005 #0.005
 
-  alpha: .4
+  alpha: 1
   alpha_scale: True
   alpha_decay: .994
   alpha_min: 0.01
-  alpha_scaling_type: 'sigmoid_reward'
+  alpha_scaling_type: 'tanh_time'
 
   std_scale: True
   std_decay: .995 # original: .99

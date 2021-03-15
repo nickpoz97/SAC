@@ -11,17 +11,17 @@ agent:
   gamma: 0.99 #0.99
   tau: 0.005 #0.005
 
-  alpha: 1
-  alpha_scale: True
+  alpha: .6
+  alpha_scale: False
   alpha_decay: .994
   alpha_min: 0.01
-  alpha_scaling_type: 'tanh_time'
+  alpha_scaling_type: 'standard_time'
 
   std_scale: True
   std_decay: .995 # original: .99
   std_min: 0.01
   std: 1 # original: 1
-  std_scaling_type: 'tanh_time'
+  std_scaling_type: 'standard_time'
   
   buffer:
     size: 100000
@@ -29,16 +29,16 @@ agent:
 
   actor:
     h_layers: 2
-    h_size: 64
+    h_size: 16
     print_model: False
 
   critic:
     h_state_layers: 0
-    h_state_size: 32
+    h_state_size: 8
     h_action_layers: 0
-    h_action_size: 32
+    h_action_size: 8
     h_layers: 2
-    h_size: 64
+    h_size: 16
     print_model: False
   
       
