@@ -15,11 +15,13 @@ agent:
   alpha_scale: False
   alpha_decay: .994
   alpha_min: 0.01
+  alpha_scaling_type: 'standard_time'
 
   std_scale: True
   std_decay: .99 # original: .99
   std_min: 0.01
   std: 1 # original: 1
+  std_scaling_type: 'standard_time'
   
   buffer:
     size: 1000000

@@ -27,6 +27,7 @@ def extract_values_from_csvs(folder, filename_list):
 
     # one file for each seed
     values = np.zeros((len(filepath_list), n_episodes))
+    seed_values = list()
 
     for fp in filepath_list:
         with open(fp, 'r') as file:
@@ -37,22 +38,28 @@ def extract_values_from_csvs(folder, filename_list):
             next(file_reader)
             # keep only results column
             values[seed_index] = np.array(list(file_reader))[:, 1]
+            seed_values.append(fp.split('_')[-2])
             seed_index += 1
-    return values
+    return values, seed_values
 
 
-def plot_all_seeds(test_name):
+def plot_all_seeds(test_name, seed_list):
     plt.close()
     n_averaged_samples = 20
     values = tests_dict[test_name]
+    seed_index = 0
+
     for episode_series in values:
         averaged_episodes = np.mean(episode_series.reshape(-1, n_averaged_samples), axis=1)
         # 1000 episodes, n_averaged_samples = 10 -> x: 5, 15, 25, ... 995
         x = range(n_averaged_samples//2, n_episodes, n_averaged_samples)
-        plt.plot(x, averaged_episodes, 'o-')
+        plt.plot(x, averaged_episodes, 'o-', label=seed_list[seed_index])
+        seed_index += 1
+
     plt.title(test_name)
     plt.ylim([-600, 100])
     plt.xlim([0, 1000])
+    plt.legend()
     graph_path = graphs_dir + os.sep + 'tests_with_seeds' + os.sep + test_name + '.png'
     plt.savefig(graph_path, dpi=150)
     plt.cla()
@@ -86,6 +93,6 @@ if __name__ == '__main__':
         # for each test we add a 2D matrix containing results for each seed
         # using test folder name as key
         key = dir_path.split(sep=os.sep)[-1]
-        tests_dict[key] = extract_values_from_csvs(dir_path, dir_files)
-        plot_all_seeds(key)
+        tests_dict[key], seed_values = extract_values_from_csvs(dir_path, dir_files)
+        plot_all_seeds(key, seed_values)
         plot_averaged_seeds(key)
