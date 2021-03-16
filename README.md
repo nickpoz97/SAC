@@ -74,3 +74,18 @@ Per il training ci sono diversi tipi di parametri modificabili in questa sezione
 	* numero di nodi per ogni hidden layer generico
 
 ## Discussione dei test
+Ogni test consiste in una configurazione di parametri provata su 3 seed per la generazione dei valori pseudocasuali (3, 9, 25) che sono stati abbastanza per verificare l' andamento di SAC all' aumentare del numero di episodi di training.
+Inoltre per ogni test vengono forniti 2 grafici:
+* uno che rappresenta l' andamento medio per ogni seed (ogni punto indica la media di 20 episodi per il dato seed)
+* uno che rappresenta la media dei seed dove sono sovrapposti i dati "mediati" (ogni punto è la media di 20 episodi) con i dati episodio per episodio per dare un' idea del rapporto tra media e varianza dei risultati.
+In tutti i test gamma l' ho lasciata a 0.99, perchè in un ambiente come LunarLanding l' obiettivo è fare atterrare il LunarLander in piedi sulla piattaforma, dopo una serie di azioni compiute in un insieme continuo di stati, quindi il reward istantaneo ha un' importanza relativamente molto bassa rispetto a quello a lungo termine.
+### test1	
+* Nel primo test ho usato un tau molto basso (0.0005) poichè in SAC l' aggiornamento dei pesi non è ritardato, ma avviene dopo ogni azione compiuta dall' agente con il valore di tau che permette di fare una media pesata (più si avvicina a 1, più viene data priorità ai valori Q rispetto a Q target).
+* Un tau così basso dovrebbe garantire la convergenza, anche se questa dovrebbe essere raggiunta dopo un numero elevato di episodi di training.
+* L' alpha è fissa a 0.2, in modo da garantire dall' inizio alla fine una stocasticità della policy non troppo alta (in modo da evitare la sola esplorazione) e neanche nulla, evitando di bloccare l' aggiornamento dei pesi su un minimo locale.
+* La std del rumore decade di un fattore .99 dopo ogni episodio, in modo da iniziare l' exploitation dei valori corretti da circa l' episodio 400 (.99^400 = 0.018) così da garantire abbastanza esporazione.
+* Il valore minimo della std del rumore è comunque 0.01, in modo da garantire sempre una minima esplorazione (anche negli ultimi episodi).
+* Dal buffer di 10^6 elementi (scelto ampio per dare un ampia scelta di tuple) ho scelto l' estrazione di un batch di 128 tuple (valore non troppo alto ne basso)
+* Ogni rete neurale è costituita da 2 layer (generici) da 64 nodi ciascuna (valore standard)
+![test1_all_seeds](graphs/tests_with_seeds/test1.png)
+![test1_avg_seeds](graphs/tests_with_variance/test1.png)
