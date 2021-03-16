@@ -51,7 +51,7 @@ L' environment su cui si è sperimentato l' algoritmo è il LunarLanderContinuou
 ## Obiettivo (trattazione informale)
 SAC grazie all' entropia permette di incentivare le azioni poco probabili per la policy stocastica attuale, che ovviamente restituisce azioni che non rispecchiano una conoscenza completa dell' ambiente.
 Questo permette una maggiore esplorazione, così il training può coinvolgere più coppie stato-azione e la policy imparata dovrebbe riflettere il comportamento migliore nelle situazioni non esplorate, perchè più generalizzata (*policy smoothing*).
-Lo scopo del trade-off coefficient è quello di dare la possibilità di diminuire il peso dell' entropia sul valore degli stati e dare più priorità all' exploitation.
+Lo scopo del trade-off coefficient è quello di dare la possibilità di diminuire il peso dell' entropia sul valore degli stati e dare più priorità all' exploitation o dare lo stesso peso (alpha = 1) a reward e entropia, in modo da dare più valore alle azioni che si distanziano maggiormente da quelle intraprese dalla policy deterministica.
 
 ## Tweaking dei parametri:
 Per il training ci sono diversi tipi di parametri modificabili in questa sezione li elencherò con una breve descrizione
@@ -76,8 +76,8 @@ Per il training ci sono diversi tipi di parametri modificabili in questa sezione
 ## Discussione dei test
 Ogni test consiste in una configurazione di parametri provata su 3 seed per la generazione dei valori pseudocasuali (3, 9, 25) che sono stati abbastanza per verificare l' andamento di SAC all' aumentare del numero di episodi di training.
 Inoltre per ogni test vengono forniti 2 grafici:
-* uno che rappresenta l' andamento medio per ogni seed (ogni punto indica la media di 20 episodi per il dato seed)
-* uno che rappresenta la media dei seed dove sono sovrapposti i dati "mediati" (ogni punto è la media di 20 episodi) con i dati episodio per episodio per dare un' idea del rapporto tra media e varianza dei risultati.
+* uno che rappresenta il reward per ogni seed (ogni punto indica il reward medio di 20 episodi per il dato seed)
+* uno che rappresenta il reward medio dei seed dove sono sovrapposti i dati "mediati" (ogni punto è la media di 20 episodi) con i dati episodio per episodio per dare un' idea del rapporto tra media e varianza dei risultati.
 In tutti i test gamma l' ho lasciata a 0.99, perchè in un ambiente come LunarLanding l' obiettivo è fare atterrare il LunarLander in piedi sulla piattaforma, dopo una serie di azioni compiute in un insieme continuo di stati, quindi il reward istantaneo ha un' importanza relativamente molto bassa rispetto a quello a lungo termine.
 ### test1	
 * Nel primo test ho usato un tau molto basso (0.0005) poichè in SAC l' aggiornamento dei pesi non è ritardato, ma avviene dopo ogni azione compiuta dall' agente con il valore di tau che permette di fare una media pesata (più si avvicina a 1, più viene data priorità ai valori Q rispetto a Q target).
@@ -89,3 +89,30 @@ In tutti i test gamma l' ho lasciata a 0.99, perchè in un ambiente come LunarLa
 * Ogni rete neurale è costituita da 2 layer (generici) da 64 nodi ciascuna (valore standard)
 ![test1_all_seeds](graphs/tests_with_seeds/test1.png)
 ![test1_avg_seeds](graphs/tests_with_variance/test1.png)
+  
+* Dai risultati ottenuti sembra che la policy raggiunta attorno all' episodio 300 sia quella che si mantiene fino alla fine del training, una policy che comunque non è ottima (reward medio inferiore a -100) e presenta una moderata varianza nei reward
+### test2
+* Questo test presenta gli stessi parametri del test1 a differenza di quelli che riguardano il buffer
+	* Ho ridotto a 10^5 la dimensione del buffer per dare una maggiore priorità alle esperienze recenti (pur senza usare un valore troppo piccolo che potrebbe influenzare negativamente la casualità del sampling durante l' experience replay)
+	* Ho aumentato a 512 la dimensione del batch in modo che il calcolo della loss tenga conto di più esperienze (teoricamente un batch più grande dovrebbe dare maggiore stabilità nella fase di training)
+	
+![test1_all_seeds](graphs/tests_with_seeds/test2.png)
+![test1_avg_seeds](graphs/tests_with_variance/test2.png)
+* I risultati ottenuti sono molto simili a quelli di test1, quindi sicuramente il batch e la dimensione del buffer non sono fattori che influenzano in modo notevole l' apprendimento della policy.
+### test3
+* Questo test presenta gli stessi parametri di test2, ma con un tau inferiore (0.0001), solo che ho notato che i risultati a parità di seed sono coincidenti con il test 2, quindi ho provato ad assegnare a tau valori elevati (come 1.0) e anche in questo caso i risultati ottenuti erano gli stessi.
+* Da qui deduco che la versione di Tensorflow utilizzata (2.3.0) presenti un bug che non permetta di considerare tau per l' aggiornamento della target network (questo bug quindi coinvolge sicuramente l' aggiornamento della target network).
+* Da questo momento in poi non verrà considerato il parametro tau.
+### test4
+* I parametri di questo test sono gli stessi di test2, fatta eccezione per alpha
+* alpha è aumentata a 0.6 in modo da dare un peso maggiore all' entropia
+* Teoricamente questo dovrebbe portare ad una maggiore esplorazione, dato che ora le azioni che hanno probabilità minore (per un dato stato) acquisicono più valore rispetto al caso alpha = .2.
+![test1_all_seeds](graphs/tests_with_seeds/test4.png)
+![test1_avg_seeds](graphs/tests_with_variance/test4.png)
+* I dati sembrano essere leggermente più fluttuanti rispetto al test 2, probabilmente perchè la std della policy decade troppo velocemente per l' importanza che ha l' entropia in questo test.
+### test5
+* Rispetto al test 4 ho aumentato l' std decay da 0.99 a 0.995, in modo da mantenere elevata la std della policy stocastica per più tempo e di conseguenza permettere all' agente di esplorare per un numero maggiore di episodi e sfruttare di più il bonus dato al valore di V e Q da parte dell' entropia
+![test1_all_seeds](graphs/tests_with_seeds/test5.png)
+![test1_avg_seeds](graphs/tests_with_variance/test5.png)
+* L' andamento rispetto ai test precedenti è inizialmente più oscillante (probabilmente a causa del decadimento lento della std)
+* Però, grazie alla maggiore esplorazione, si ha una convergenza molto più smooth alla policy definitiva, questo dovrebbe garantire una policy che sa generalizzare meglio rispetto alle precedenti. 

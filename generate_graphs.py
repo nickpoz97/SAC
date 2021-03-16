@@ -57,11 +57,11 @@ def plot_all_seeds(test_name, seed_list):
         seed_index += 1
 
     plt.title(test_name)
-    plt.ylim([-600, 100])
+    plt.ylim([-500, 200])
     plt.xlim([0, 1000])
     plt.legend()
     graph_path = graphs_dir + os.sep + 'tests_with_seeds' + os.sep + test_name + '.png'
-    plt.savefig(graph_path, dpi=150)
+    plt.savefig(graph_path, dpi=180)
     plt.cla()
 
 def plot_averaged_seeds(test_name):
@@ -80,10 +80,10 @@ def plot_averaged_seeds(test_name):
     plt.plot(x2, averaged_episodes, 'o-')
 
     plt.title(test_name)
-    plt.ylim([-600, 100])
+    plt.ylim([-500, 200])
     plt.xlim([0, 1000])
     graph_path = graphs_dir + os.sep + 'tests_with_variance' + os.sep + test_name + '.png'
-    plt.savefig(graph_path, dpi=150)
+    plt.savefig(graph_path, dpi=180)
     plt.cla()
 
 if __name__ == '__main__':
@@ -96,3 +96,16 @@ if __name__ == '__main__':
         tests_dict[key], seed_values = extract_values_from_csvs(dir_path, dir_files)
         plot_all_seeds(key, seed_values)
         plot_averaged_seeds(key)
+
+    for key, values in tests_dict.items():
+        n_averaged_samples = 100
+        values = np.mean(values, axis=0)
+        averaged_episodes = np.mean(values.reshape(-1, n_averaged_samples), axis=1)
+        # 1000 episodes, n_averaged_samples = 10 -> x: 5, 15, 25, ... 995
+        x = range(n_averaged_samples // 2, n_episodes, n_averaged_samples)
+        plt.plot(x, averaged_episodes, 'o-', label=key)
+        plt.ylim([-300, 0])
+        plt.xlim([0, 1000])
+        plt.legend()
+        graph_path = graphs_dir + os.sep + 'all_tests' + '.png'
+        plt.savefig(graph_path, dpi=180)
