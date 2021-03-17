@@ -1,5 +1,5 @@
 setup:
-  seed: 9
+  seed: 25
   use_gpu: False
 
 train:

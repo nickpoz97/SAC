@@ -105,7 +105,7 @@ In tutti i test gamma l' ho lasciata a 0.99, perchè in un ambiente come LunarLa
 * Da questo momento in poi non verrà considerato il parametro tau.
 ### test4
 * I parametri di questo test sono gli stessi di test2, fatta eccezione per alpha
-* alpha è aumentata a 0.6 in modo da dare un peso maggiore all' entropia
+* alpha è aumentata a 0.6 (fisso) in modo da dare un peso maggiore all' entropia
 * Teoricamente questo dovrebbe portare ad una maggiore esplorazione, dato che ora le azioni che hanno probabilità minore (per un dato stato) acquisicono più valore rispetto al caso alpha = .2.
 ![test1_all_seeds](graphs/tests_with_seeds/test4.png)
 ![test1_avg_seeds](graphs/tests_with_variance/test4.png)
@@ -115,4 +115,10 @@ In tutti i test gamma l' ho lasciata a 0.99, perchè in un ambiente come LunarLa
 ![test1_all_seeds](graphs/tests_with_seeds/test5.png)
 ![test1_avg_seeds](graphs/tests_with_variance/test5.png)
 * L' andamento rispetto ai test precedenti è inizialmente più oscillante (probabilmente a causa del decadimento lento della std)
-* Però, grazie alla maggiore esplorazione, si ha una convergenza molto più smooth alla policy definitiva, questo dovrebbe garantire una policy che sa generalizzare meglio rispetto alle precedenti. 
+* Però, grazie alla maggiore esplorazione, si ha una convergenza molto più smooth alla policy definitiva, questo dovrebbe garantire una policy che sa generalizzare meglio rispetto alle precedenti.
+### test6
+* Rispetto a test5 ho voluto provare ad aumentare ulteriormente l' alpha fissa (ora a 0.8) per avere un quadro più completo silla correlazione entropia-risultati
+![test1_all_seeds](graphs/tests_with_seeds/test6.png)
+![test1_avg_seeds](graphs/tests_with_variance/test6.png)
+* Dai risultati ottenuti noto che un aumento ulteriore dell' entropia non contribuisce alla convergenza ad una policy migliore dei casi precedenti.
+* I risultati sono analoghi  quelli del test5
