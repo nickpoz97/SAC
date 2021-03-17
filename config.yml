@@ -1,5 +1,5 @@
 setup:
-  seed: 25
+  seed: 3
   use_gpu: False
 
 train:
@@ -11,21 +11,21 @@ agent:
   gamma: 0.99 #0.99
   tau: 0.0005 #0.005
 
-  alpha: .6
+  alpha: .2
   alpha_scale: False
-  alpha_decay: .995
+  alpha_decay: .994
   alpha_min: 0.01
   alpha_scaling_type: 'standard_time'
 
   std_scale: True
-  std_decay: .997 # original: .99
+  std_decay: .99 # original: .99
   std_min: 0.01
   std: 1 # original: 1
   std_scaling_type: 'standard_time'
   
   buffer:
-    size: 100000
-    batch: 512 # origi: 128
+    size: 1000000
+    batch: 128 # origi: 128
 
   actor:
     h_layers: 2

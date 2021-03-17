@@ -97,13 +97,17 @@ if __name__ == '__main__':
         plot_all_seeds(key, seed_values)
         plot_averaged_seeds(key)
 
+    from random import random
     for key, values in tests_dict.items():
+        n_colors = len(tests_dict)
+
         n_averaged_samples = 100
         values = np.mean(values, axis=0)
         averaged_episodes = np.mean(values.reshape(-1, n_averaged_samples), axis=1)
         # 1000 episodes, n_averaged_samples = 10 -> x: 5, 15, 25, ... 995
         x = range(n_averaged_samples // 2, n_episodes, n_averaged_samples)
-        plt.plot(x, averaged_episodes, 'o-', label=key)
+
+        plt.plot(x, averaged_episodes, 'o-', label=key, color=(random(), random(), random()))
         plt.ylim([-300, 0])
         plt.xlim([0, 1000])
         plt.legend()

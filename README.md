@@ -102,6 +102,7 @@ In tutti i test gamma l' ho lasciata a 0.99, perchè in un ambiente come LunarLa
 ### test3
 * Questo test presenta gli stessi parametri di test2, ma con un tau inferiore (0.0001), solo che ho notato che i risultati a parità di seed sono coincidenti con il test 2, quindi ho provato ad assegnare a tau valori elevati (come 1.0) e anche in questo caso i risultati ottenuti erano gli stessi.
 * Da qui deduco che la versione di Tensorflow utilizzata (2.3.0) presenti un bug che non permetta di considerare tau per l' aggiornamento della target network (questo bug quindi coinvolge sicuramente l' aggiornamento della target network).
+* Tau non viene considerato nemmeno con la versione di Tensorflow 2.4.1
 * Da questo momento in poi non verrà considerato il parametro tau.
 ### test4
 * I parametri di questo test sono gli stessi di test2, fatta eccezione per alpha
@@ -122,3 +123,59 @@ In tutti i test gamma l' ho lasciata a 0.99, perchè in un ambiente come LunarLa
 ![test1_avg_seeds](graphs/tests_with_variance/test6.png)
 * Dai risultati ottenuti noto che un aumento ulteriore dell' entropia non contribuisce alla convergenza ad una policy migliore dei casi precedenti.
 * I risultati sono analoghi  quelli del test5
+### test7
+* In questo test sono tornato a valori di alpha come nel test5 (0.6)
+* A differenza però di test 5, qui l' std decay è più alto (0.997)
+* L' obiettivo di questo test è vedere se mantenere il rumore della policy alto per più tempo possa portare a risultati migliori
+poichè l' agente dovrebbe esplorare per più episodi rispetto ai precedenti test.
+![test1_all_seeds](graphs/tests_with_seeds/test7.png)
+![test1_avg_seeds](graphs/tests_with_variance/test7.png)
+* I risultati si sono rivelati addirittura peggiori rispetto agli altri test
+* Anche se l' agente sicuramente ha esplorato di più (i reward ottenuti hanno un' oscillazione molto elevata fino all' episodio 800)
+alla fine la policy a cui converge l' algoritmo non è comunque ottimale.
+### test8
+* Questo test utilizza gli stessi parametri usati in test5 (alpha=.6, std=1, std_decay=.995)
+* In questo test ho voluto modificare i parametri della rete Q in modo da dare più indipendenza tra i due input (stato, azione):
+![network](graphs/critic.png)
+* Al livello 1 degli hidden layers si trovano 2 layer:
+    * Uno da 32 neuroni collegato allo stato in input
+    * Uno da 32 neuroni collegaato all' azione in input
+* Al livello 2 degli hidden layer si trova un unico hidden layer da 64 neuroni collegato ai due precedenti
+![test1_all_seeds](graphs/tests_with_seeds/test8.png)
+![test1_avg_seeds](graphs/tests_with_variance/test8.png)
+* Sorprendentemente i test sono in linea con il test5, sebbene la struttura della rete sia completamente diversa
+### test9
+* Sempre prendendo come riferimento il test5, ho modificato la rete in modo da avere come neuroni per hidden layers (collegate a tutti i neuroni stato-azione)
+![test1_all_seeds](graphs/tests_with_seeds/test9.png)
+![test1_avg_seeds](graphs/tests_with_variance/test9.png)
+* Aumentare il numero di neuroni non sembra influenzare particolarmente l' andamento di SAC
+### test10
+* Anche questo test si basa sul test5 (inclusa la struttura della rete)
+* Dato che nei test precedenti i valori alpha 0.2 e 0.6 hanno dato risultati simili, voluto provare in questo test a usare
+il valore 0.4 (media dei 2) che dovrebbe dare risultati simili.
+* In aggiunta a questo ho voluto provare a scalare la std della policy stocastica usando una funzione che si ottiene dallo stretching/scaling/shifting
+della tangente iperbolica (std_scaling_type: 'tanh_time') dove la variabile indipendente sarebbe il numero dell' episodio e l' output sarebbe il valore della std
+* Questo dovrebbe garantire un std molto alta (circa 1) nei primi 200 episodi che poi cala drasticamente tra l' episodio 250 e 400 per poi convergere a 0
+![tanh](graphs/tanh_episodes.png)
+![test1_all_seeds](graphs/tests_with_seeds/test10.png)
+![test1_avg_seeds](graphs/tests_with_variance/test10.png)
+* L' andamento è molto simile a quello dei test precedenti, ma l' std bassa verso la fine garantisce valori meno oscillanti.
+### test11
+* Ho voluto modificare l' alpha in modo da variare in base al reward medio secondo una funzione che è una trasformazione di una sigmoide (alpha_scaling_type: 'sigmoid_reward')
+![sigmoid](graphs/sigmoid.png)
+* la variabile indipendente sull' asse x sarebbe il reward medio
+* il denominatore per x è molto alto, perchè altrimenti ci sarebbero voluti dei reward medi molto alti (vicini allo zero) prima di avere un alpha << 1.
+* il motivo per cui ho voluto provare questo approccio è dovuto al fatto che teoricamente quando il reward medio fosse molto basso bisogna dare priorità all' eplorazione
+e invece se fosse molto basso basso bisognerebbe dare più priorità all' ottenere i valori corretti delle coppie stato, azione.
+![test1_all_seeds](graphs/tests_with_seeds/test11.png)
+![test1_avg_seeds](graphs/tests_with_variance/test11.png)
+* anche in questo caso i risultati non sono stati pessimi, ma in linea con i precedenti.
+### test12
+* In questo test ho modificato test11 in modo da usare la funzione basata su tanh (e avente il numero dell' episodio sull' asse x)
+sia per l' alpha che per la std
+* questo dovrebbe massimizzare il contributo dell' entropia e della casualià della policy nei primi 200 episodi per poi renderlo
+quasi zero dall' episodio 450
+![test1_all_seeds](graphs/tests_with_seeds/test12.png)
+![test1_avg_seeds](graphs/tests_with_variance/test12.png)
+* I risultati sono in linea con i test precedenti
+### test13
