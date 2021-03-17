@@ -12,8 +12,8 @@ agent:
   tau: 0.005 #0.005
 
   alpha: .6
-  alpha_scale: False
-  alpha_decay: .994
+  alpha_scale: True
+  alpha_decay: .995
   alpha_min: 0.01
   alpha_scaling_type: 'standard_time'
 

@@ -1,4 +1,0 @@
-- comparison with test1
-- lowered buffer size (/10)
-- increased batch size (512)
-- A larger batch with more recent examples should increase loos accuracy

@@ -1,1 +1,0 @@
-used tanh for both (reference test5)

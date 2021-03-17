@@ -1,3 +1,0 @@
-- high batch size (1000000)
-- low tau (0.0005)
-- .2 alpha
