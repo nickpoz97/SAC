@@ -108,8 +108,6 @@ In tutti i test gamma l' ho lasciata a 0.99, perchè in un ambiente come LunarLa
 * I risultati ottenuti sono molto simili a quelli di test1, quindi sicuramente il batch e la dimensione del buffer non sono fattori che influenzano in modo notevole l' apprendimento della policy.
 ### test3
 * Questo test presenta gli stessi parametri di test2, ma con un tau inferiore (0.0001), solo che ho notato che i risultati a parità di seed sono coincidenti con il test 2, quindi ho provato ad assegnare a tau valori elevati (come 1.0) e anche in questo caso i risultati ottenuti erano gli stessi.
-* Da qui deduco che la versione di Tensorflow utilizzata (2.3.0) presenti un bug che non permetta di considerare tau per l' aggiornamento della target network (questo bug quindi coinvolge sicuramente l' aggiornamento della target network).
-* Tau non viene considerato nemmeno con la versione di Tensorflow 2.4.1
 * Da questo momento in poi non verrà considerato il parametro tau.
 ### test4
 * I parametri di questo test sono gli stessi di test2, fatta eccezione per alpha
